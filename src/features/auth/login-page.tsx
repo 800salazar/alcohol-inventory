@@ -30,6 +30,7 @@ export function LoginPage() {
 
   const [step, setStep] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState('')
+  const [sendCodeError, setSendCodeError] = useState<string | null>(null)
 
   const emailForm = useForm<EmailForm>({
     resolver: zodResolver(emailSchema),
@@ -44,16 +45,26 @@ export function LoginPage() {
   if (!authLoading && session) return <Navigate to={from} replace />
 
   const onSendCode = async (values: EmailForm) => {
+    const normalizedEmail = values.email.trim().toLowerCase()
+
+    // Avanzamos al paso de código de inmediato para no dejar la UI bloqueada
+    // en caso de respuestas lentas o errores del proveedor de correo.
+    setEmail(normalizedEmail)
+    setStep('code')
+    setSendCodeError(null)
+
     try {
-      await sendOtp(values.email)
-      setEmail(values.email)
-      setStep('code')
+      await sendOtp(normalizedEmail)
       toast.success('Te enviamos un código a tu correo')
     } catch (err) {
-      toast.error(
+      const message =
         err instanceof Error
           ? err.message
-          : 'No se pudo enviar el código. ¿El usuario está dado de alta?',
+          : 'No se pudo enviar el código. ¿El usuario está dado de alta?'
+
+      setSendCodeError(message)
+      toast.error(
+        message,
       )
     }
   }
@@ -73,9 +84,13 @@ export function LoginPage() {
   const resend = async () => {
     try {
       await sendOtp(email)
+      setSendCodeError(null)
       toast.success('Código reenviado')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'No se pudo reenviar')
+      const message =
+        err instanceof Error ? err.message : 'No se pudo reenviar'
+      setSendCodeError(message)
+      toast.error(message)
     }
   }
 
@@ -143,6 +158,9 @@ export function LoginPage() {
                   <p className="text-xs text-destructive">
                     {otpForm.formState.errors.token.message}
                   </p>
+                )}
+                {sendCodeError && (
+                  <p className="text-xs text-destructive">{sendCodeError}</p>
                 )}
               </div>
               <Button
