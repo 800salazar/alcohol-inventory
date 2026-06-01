@@ -4,11 +4,13 @@ import { supabase } from '@/lib/supabase'
 import type { Profile, UserRole } from '@/types'
 
 const SIMPLE_AUTH_ENABLED =
-  import.meta.env.VITE_SIMPLE_AUTH_ENABLED === 'true'
+  String(import.meta.env.VITE_SIMPLE_AUTH_ENABLED ?? '').trim() === 'true'
 const SIMPLE_AUTH_CODE =
   String(import.meta.env.VITE_SIMPLE_AUTH_CODE ?? '12345678').trim()
 const SIMPLE_AUTH_ROLE: UserRole =
-  import.meta.env.VITE_SIMPLE_AUTH_ROLE === 'OPERATOR' ? 'OPERATOR' : 'ADMIN'
+  String(import.meta.env.VITE_SIMPLE_AUTH_ROLE ?? '').trim() === 'OPERATOR'
+    ? 'OPERATOR'
+    : 'ADMIN'
 const SIMPLE_AUTH_STORAGE_KEY = 'inventario.simple-auth.v1'
 
 interface SimpleAuthState {

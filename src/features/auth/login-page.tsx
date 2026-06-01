@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/card'
 
 const SIMPLE_AUTH_ENABLED =
-  import.meta.env.VITE_SIMPLE_AUTH_ENABLED === 'true'
+  String(import.meta.env.VITE_SIMPLE_AUTH_ENABLED ?? '').trim() === 'true'
 const SIMPLE_AUTH_HINT = String(import.meta.env.VITE_SIMPLE_AUTH_HINT ?? '').trim()
 
 export function LoginPage() {
