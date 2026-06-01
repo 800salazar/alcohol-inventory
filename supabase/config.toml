@@ -32,6 +32,10 @@ enable_confirmations = false
 otp_length = 8
 otp_expiry = 3600
 
+[auth.email.template.magic_link]
+subject = "Tu codigo de acceso"
+content_path = "./supabase/templates/magic_link_code.html"
+
 [storage]
 enabled = true
 file_size_limit = "50MiB"
