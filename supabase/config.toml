@@ -29,7 +29,7 @@ enable_signup = false
 [auth.email]
 enable_signup = false
 enable_confirmations = false
-otp_length = 6
+otp_length = 8
 otp_expiry = 3600
 
 [storage]

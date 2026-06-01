@@ -5,7 +5,13 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { ArrowLeft, Loader2, Wine } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from './auth-provider'
-import { emailSchema, otpSchema, type EmailForm, type OtpForm } from './schema'
+import {
+  OTP_LENGTH,
+  emailSchema,
+  otpSchema,
+  type EmailForm,
+  type OtpForm,
+} from './schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -122,12 +128,14 @@ export function LoginPage() {
           ) : (
             <form onSubmit={otpForm.handleSubmit(onVerify)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="token">Código de 6 dígitos</Label>
+                <Label htmlFor="token">Código de {OTP_LENGTH} dígitos</Label>
                 <Input
                   id="token"
                   inputMode="numeric"
                   autoComplete="one-time-code"
-                  placeholder="123456"
+                  placeholder="12345678"
+                  maxLength={OTP_LENGTH}
+                  pattern={`\\d{${OTP_LENGTH}}`}
                   className="text-center text-lg tracking-[0.5em]"
                   {...otpForm.register('token')}
                 />

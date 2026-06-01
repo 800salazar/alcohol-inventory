@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+export const OTP_LENGTH = 8
+
 export const emailSchema = z.object({
   email: z.string().email('Correo inválido'),
 })
@@ -7,8 +9,8 @@ export const emailSchema = z.object({
 export const otpSchema = z.object({
   token: z
     .string()
-    .min(6, 'El código tiene 6 dígitos')
-    .max(10, 'Código inválido'),
+    .trim()
+    .regex(/^\d{8}$/, `El código debe tener ${OTP_LENGTH} dígitos`),
 })
 
 export type EmailForm = z.infer<typeof emailSchema>

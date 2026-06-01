@@ -103,7 +103,7 @@ pnpm dev                   # http://localhost:5173
 
 ### Login por OTP
 
-No hay contraseñas. El usuario escribe su correo, recibe un **código de 6
+No hay contraseñas. El usuario escribe su correo, recibe un **código de 8
 dígitos** y lo introduce para entrar (`signInWithOtp` + `verifyOtp`). Solo pueden
 entrar usuarios **ya dados de alta por un administrador** (`shouldCreateUser:
 false`).
