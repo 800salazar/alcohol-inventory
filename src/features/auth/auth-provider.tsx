@@ -3,6 +3,61 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { Profile, UserRole } from '@/types'
 
+const SIMPLE_AUTH_ENABLED =
+  import.meta.env.VITE_SIMPLE_AUTH_ENABLED === 'true'
+const SIMPLE_AUTH_CODE =
+  String(import.meta.env.VITE_SIMPLE_AUTH_CODE ?? '12345678').trim()
+const SIMPLE_AUTH_ROLE: UserRole =
+  import.meta.env.VITE_SIMPLE_AUTH_ROLE === 'OPERATOR' ? 'OPERATOR' : 'ADMIN'
+const SIMPLE_AUTH_STORAGE_KEY = 'inventario.simple-auth.v1'
+
+interface SimpleAuthState {
+  email: string
+}
+
+function createSimpleProfile(email: string): Profile {
+  const now = new Date().toISOString()
+  return {
+    id: 'simple-auth-user',
+    email,
+    full_name: 'Preproduccion',
+    role: SIMPLE_AUTH_ROLE,
+    active: true,
+    created_at: now,
+    updated_at: now,
+  }
+}
+
+function createSimpleSession(email: string): Session {
+  return {
+    user: {
+      id: 'simple-auth-user',
+      email,
+    },
+  } as Session
+}
+
+function readSimpleAuthState(): SimpleAuthState | null {
+  if (!SIMPLE_AUTH_ENABLED) return null
+  try {
+    const raw = localStorage.getItem(SIMPLE_AUTH_STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Partial<SimpleAuthState>
+    if (!parsed.email || typeof parsed.email !== 'string') return null
+    return { email: parsed.email }
+  } catch {
+    return null
+  }
+}
+
+function writeSimpleAuthState(state: SimpleAuthState) {
+  localStorage.setItem(SIMPLE_AUTH_STORAGE_KEY, JSON.stringify(state))
+}
+
+function clearSimpleAuthState() {
+  localStorage.removeItem(SIMPLE_AUTH_STORAGE_KEY)
+}
+
 interface AuthContextValue {
   session: Session | null
   user: User | null
@@ -39,6 +94,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (SIMPLE_AUTH_ENABLED) {
+      const simpleState = readSimpleAuthState()
+      if (simpleState) {
+        setSession(createSimpleSession(simpleState.email))
+        setProfile(createSimpleProfile(simpleState.email))
+      } else {
+        setSession(null)
+        setProfile(null)
+      }
+      setLoading(false)
+      return
+    }
+
     let active = true
 
     // Sesión inicial.
@@ -67,6 +135,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const sendOtp = useCallback(async (email: string) => {
+    if (SIMPLE_AUTH_ENABLED) {
+      if (!email.trim()) {
+        throw new Error('Ingresa un correo para continuar')
+      }
+      return
+    }
+
     // shouldCreateUser: false → solo pueden entrar usuarios ya dados de alta
     // por un administrador.
     const { error } = await supabase.auth.signInWithOtp({
@@ -77,6 +152,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const verifyOtp = useCallback(async (email: string, token: string) => {
+    if (SIMPLE_AUTH_ENABLED) {
+      const normalizedEmail = email.trim().toLowerCase()
+      const normalizedToken = token.trim()
+
+      if (normalizedToken !== SIMPLE_AUTH_CODE) {
+        throw new Error('Codigo incorrecto (modo preproduccion)')
+      }
+
+      writeSimpleAuthState({ email: normalizedEmail })
+      setSession(createSimpleSession(normalizedEmail))
+      setProfile(createSimpleProfile(normalizedEmail))
+      return
+    }
+
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim().toLowerCase(),
       token: token.trim(),
@@ -86,6 +175,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = useCallback(async () => {
+    if (SIMPLE_AUTH_ENABLED) {
+      clearSimpleAuthState()
+      setSession(null)
+      setProfile(null)
+      return
+    }
+
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     setProfile(null)

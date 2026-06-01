@@ -23,6 +23,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+const SIMPLE_AUTH_ENABLED =
+  import.meta.env.VITE_SIMPLE_AUTH_ENABLED === 'true'
+const SIMPLE_AUTH_HINT = String(import.meta.env.VITE_SIMPLE_AUTH_HINT ?? '').trim()
+
 export function LoginPage() {
   const { session, loading: authLoading, sendOtp, verifyOtp } = useAuth()
   const location = useLocation()
@@ -55,7 +59,11 @@ export function LoginPage() {
 
     try {
       await sendOtp(normalizedEmail)
-      toast.success('Te enviamos un código a tu correo')
+      toast.success(
+        SIMPLE_AUTH_ENABLED
+          ? 'Ingresa el codigo de acceso de preproduccion'
+          : 'Te enviamos un código a tu correo',
+      )
     } catch (err) {
       const message =
         err instanceof Error
@@ -104,7 +112,9 @@ export function LoginPage() {
           <CardTitle className="text-xl">Inventario Licor</CardTitle>
           <CardDescription>
             {step === 'email'
-              ? 'Ingresa tu correo para recibir un código'
+              ? SIMPLE_AUTH_ENABLED
+                ? 'Ingresa tu correo para continuar con acceso simple'
+                : 'Ingresa tu correo para recibir un código'
               : `Escribe el código enviado a ${email}`}
           </CardDescription>
         </CardHeader>
@@ -161,6 +171,9 @@ export function LoginPage() {
                 )}
                 {sendCodeError && (
                   <p className="text-xs text-destructive">{sendCodeError}</p>
+                )}
+                {SIMPLE_AUTH_ENABLED && SIMPLE_AUTH_HINT && (
+                  <p className="text-xs text-muted-foreground">{SIMPLE_AUTH_HINT}</p>
                 )}
               </div>
               <Button
