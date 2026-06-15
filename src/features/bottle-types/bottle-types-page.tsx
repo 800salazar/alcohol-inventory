@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Pencil, Plus, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,13 +10,14 @@ import {
 } from './schema'
 import { uploadBottleImage } from '@/lib/storage'
 import {
+  useBottleCategories,
   useBottleTypes,
   useCreateBottleType,
   useDeleteBottleType,
   useUpdateBottleType,
 } from './queries'
 import { useAuth } from '@/features/auth/auth-provider'
-import type { BottleType } from '@/types'
+import type { BottleTypeWithCategory } from '@/types'
 import { formatOunces } from '@/lib/utils'
 import { PageHeader } from '@/components/page-header'
 import { EmptyState, ErrorState, LoadingState } from '@/components/data-state'
@@ -41,8 +42,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const EMPTY_FORM: BottleTypeForm = {
+  bottle_category_id: '',
   name: '',
   barcode: '',
   full_ounces: '',
@@ -54,12 +63,13 @@ const EMPTY_FORM: BottleTypeForm = {
 export function BottleTypesPage() {
   const { isAdmin } = useAuth()
   const { data, isLoading, error } = useBottleTypes()
+  const { data: bottleCategories } = useBottleCategories()
   const createMut = useCreateBottleType()
   const updateMut = useUpdateBottleType()
   const deleteMut = useDeleteBottleType()
 
   const [open, setOpen] = useState(false)
-  const [editing, setEditing] = useState<BottleType | null>(null)
+  const [editing, setEditing] = useState<BottleTypeWithCategory | null>(null)
   const [uploading, setUploading] = useState(false)
 
   const form = useForm<BottleTypeForm>({
@@ -93,9 +103,10 @@ export function BottleTypesPage() {
     setOpen(true)
   }
 
-  const openEdit = (bt: BottleType) => {
+  const openEdit = (bt: BottleTypeWithCategory) => {
     setEditing(bt)
     form.reset({
+      bottle_category_id: bt.bottle_category_id,
       name: bt.name,
       barcode: bt.barcode ?? '',
       full_ounces: String(bt.full_ounces),
@@ -122,7 +133,7 @@ export function BottleTypesPage() {
     }
   }
 
-  const onDelete = async (bt: BottleType) => {
+  const onDelete = async (bt: BottleTypeWithCategory) => {
     if (!confirm(`¿Eliminar "${bt.name}"?`)) return
     try {
       await deleteMut.mutateAsync(bt.id)
@@ -164,6 +175,7 @@ export function BottleTypesPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Categoría</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Código de barras</TableHead>
                 <TableHead className="text-right">Capacidad</TableHead>
@@ -175,6 +187,11 @@ export function BottleTypesPage() {
             <TableBody>
               {data.map((bt) => (
                 <TableRow key={bt.id}>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {bt.bottle_category?.name ?? '—'}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="font-medium">{bt.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {bt.barcode ?? '—'}
@@ -223,6 +240,33 @@ export function BottleTypesPage() {
           </DialogHeader>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
+              <Label>Categoría de botella</Label>
+              <Controller
+                control={form.control}
+                name="bottle_category_id"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {bottleCategories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {form.formState.errors.bottle_category_id && (
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.bottle_category_id.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="name">Nombre</Label>
               <Input
                 id="name"
@@ -257,11 +301,17 @@ export function BottleTypesPage() {
                   id="empty_weight_oz"
                   inputMode="decimal"
                   placeholder="17.6"
+                  disabled={editing?.empty_weight_oz != null}
                   {...form.register('empty_weight_oz')}
                 />
                 {form.formState.errors.empty_weight_oz && (
                   <p className="text-xs text-destructive">
                     {form.formState.errors.empty_weight_oz.message}
+                  </p>
+                )}
+                {editing?.empty_weight_oz != null && (
+                  <p className="text-xs text-muted-foreground">
+                    El peso vacío ya fue establecido y no puede modificarse.
                   </p>
                 )}
               </div>

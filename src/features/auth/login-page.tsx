@@ -113,9 +113,11 @@ export function LoginPage() {
           <CardDescription>
             {step === 'email'
               ? SIMPLE_AUTH_ENABLED
-                ? 'Ingresa tu correo para continuar con acceso simple'
+                ? 'Ingresa tu correo para continuar. En este entorno no se enviará correo.'
                 : 'Ingresa tu correo para recibir un código'
-              : `Escribe el código enviado a ${email}`}
+              : SIMPLE_AUTH_ENABLED
+                ? `Escribe el código compartido para ${email}`
+                : `Escribe el código enviado a ${email}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -147,7 +149,7 @@ export function LoginPage() {
                 {emailForm.formState.isSubmitting && (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 )}
-                Enviar código
+                {SIMPLE_AUTH_ENABLED ? 'Continuar' : 'Enviar código'}
               </Button>
             </form>
           ) : (
@@ -171,6 +173,11 @@ export function LoginPage() {
                 )}
                 {sendCodeError && (
                   <p className="text-xs text-destructive">{sendCodeError}</p>
+                )}
+                {SIMPLE_AUTH_ENABLED && (
+                  <p className="text-xs text-muted-foreground">
+                    En este entorno el acceso es local y no se manda ningún correo.
+                  </p>
                 )}
                 {SIMPLE_AUTH_ENABLED && SIMPLE_AUTH_HINT && (
                   <p className="text-xs text-muted-foreground">{SIMPLE_AUTH_HINT}</p>
@@ -198,13 +205,15 @@ export function LoginPage() {
                   <ArrowLeft className="h-3 w-3" />
                   Cambiar correo
                 </button>
-                <button
-                  type="button"
-                  onClick={resend}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Reenviar código
-                </button>
+                {!SIMPLE_AUTH_ENABLED && (
+                  <button
+                    type="button"
+                    onClick={resend}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Reenviar código
+                  </button>
+                )}
               </div>
             </form>
           )}

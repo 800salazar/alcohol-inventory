@@ -1,9 +1,24 @@
 import { supabase } from '@/lib/supabase'
-import type { BottleType, BottleTypeInsert, BottleTypeUpdate } from '@/types'
+import type {
+  BottleCategory,
+  BottleType,
+  BottleTypeInsert,
+  BottleTypeUpdate,
+  BottleTypeWithCategory,
+} from '@/types'
 
-export async function listBottleTypes(): Promise<BottleType[]> {
+export async function listBottleTypes(): Promise<BottleTypeWithCategory[]> {
   const { data, error } = await supabase
     .from('bottle_types')
+    .select('*, bottle_category:bottle_categories(*)')
+    .order('name', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function listBottleCategories(): Promise<BottleCategory[]> {
+  const { data, error } = await supabase
+    .from('bottle_categories')
     .select('*')
     .order('name', { ascending: true })
   if (error) throw error

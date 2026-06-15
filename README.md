@@ -108,9 +108,16 @@ dígitos** y lo introduce para entrar (`signInWithOtp` + `verifyOtp`). Solo pued
 entrar usuarios **ya dados de alta por un administrador** (`shouldCreateUser:
 false`).
 
+> Si activas `VITE_SIMPLE_AUTH_ENABLED=true`, la app entra en modo simple de
+> preproducción: no usa Supabase Auth, no envía correos y acepta el código
+> configurado en `VITE_SIMPLE_AUTH_CODE`.
+>
 > En **local**, el código llega al buzón de pruebas (Inbucket):
 > http://localhost:54324. En **producción**, asegúrate de que la plantilla de
-> correo "Magic Link" incluya `{{ .Token }}` para mostrar el código.
+> correo "Magic Link" incluya `{{ .Token }}` para mostrar el código. Si usas el
+> SMTP por defecto de Supabase, solo enviará correos a miembros del equipo del
+> proyecto y además tiene límites muy bajos; para usuarios reales necesitas un
+> SMTP propio.
 
 ### Crear el primer administrador
 

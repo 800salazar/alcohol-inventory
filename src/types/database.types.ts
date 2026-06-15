@@ -51,9 +51,31 @@ export type Database = {
         }
         Relationships: []
       }
+      bottle_categories: {
+        Row: {
+          id: string
+          name: string
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
       bottle_types: {
         Row: {
           id: string
+          bottle_category_id: string
           name: string
           barcode: string | null
           full_ounces: number
@@ -65,6 +87,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          bottle_category_id: string
           name: string
           barcode?: string | null
           full_ounces: number
@@ -76,6 +99,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          bottle_category_id?: string
           name?: string
           barcode?: string | null
           full_ounces?: number
@@ -85,13 +109,21 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'bottle_types_bottle_category_id_fkey'
+            columns: ['bottle_category_id']
+            referencedRelation: 'bottle_categories'
+            referencedColumns: ['id']
+          },
+        ]
       }
       bottles: {
         Row: {
           id: string
           unique_code: string
           bottle_type_id: string
+          is_opened: boolean
           status: Database['public']['Enums']['bottle_status']
           current_ounces: number
           created_at: string
@@ -101,6 +133,7 @@ export type Database = {
           id?: string
           unique_code: string
           bottle_type_id: string
+          is_opened?: boolean
           status?: Database['public']['Enums']['bottle_status']
           current_ounces?: number
           created_at?: string
@@ -110,6 +143,7 @@ export type Database = {
           id?: string
           unique_code?: string
           bottle_type_id?: string
+          is_opened?: boolean
           status?: Database['public']['Enums']['bottle_status']
           current_ounces?: number
           created_at?: string

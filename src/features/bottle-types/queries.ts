@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createBottleType,
   deleteBottleType,
+  listBottleCategories,
   listBottleTypes,
   updateBottleType,
 } from './api'
@@ -9,12 +10,20 @@ import type { BottleTypeInsert, BottleTypeUpdate } from '@/types'
 
 export const bottleTypeKeys = {
   all: ['bottle_types'] as const,
+  categories: ['bottle_categories'] as const,
 }
 
 export function useBottleTypes() {
   return useQuery({
     queryKey: bottleTypeKeys.all,
     queryFn: listBottleTypes,
+  })
+}
+
+export function useBottleCategories() {
+  return useQuery({
+    queryKey: bottleTypeKeys.categories,
+    queryFn: listBottleCategories,
   })
 }
 

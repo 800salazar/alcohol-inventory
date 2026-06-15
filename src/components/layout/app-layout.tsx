@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import {
   Boxes,
   ClipboardList,
+  Grape,
   FlaskConical,
   LayoutDashboard,
   ListTree,
@@ -32,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Inicio', icon: LayoutDashboard },
   { to: '/bottle-types', label: 'Tipos de botella', icon: BottleIcon },
   { to: '/bottles', label: 'Botellas', icon: Boxes },
+  { to: '/bottle-categories', label: 'Categorías de licor', icon: Grape },
   { to: '/categories', label: 'Categorías', icon: ListTree },
   { to: '/products', label: 'Productos', icon: Package },
   { to: '/recipes', label: 'Recetas', icon: FlaskConical },

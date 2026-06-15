@@ -57,6 +57,25 @@ begin
 end;
 $$;
 
+-- -----------------------------------------------------------------------------
+-- 3. PROFILES  (extiende auth.users)
+-- -----------------------------------------------------------------------------
+create table public.profiles (
+  id          uuid primary key references auth.users (id) on delete cascade,
+  email       text not null,
+  full_name   text,
+  role        public.user_role not null default 'OPERATOR',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+comment on table public.profiles is 'Perfil de aplicación. 1:1 con auth.users; guarda rol y metadatos.';
+
+create trigger trg_profiles_updated_at
+  before update on public.profiles
+  for each row execute function public.set_updated_at();
+
 -- Devuelve el rol del usuario autenticado. SECURITY DEFINER para evitar recursión
 -- de RLS al leer `profiles` desde dentro de las propias policies de `profiles`.
 create or replace function public.current_user_role()
@@ -82,25 +101,6 @@ as $$
     where id = auth.uid() and role = 'ADMIN'
   );
 $$;
-
--- -----------------------------------------------------------------------------
--- 3. PROFILES  (extiende auth.users)
--- -----------------------------------------------------------------------------
-create table public.profiles (
-  id          uuid primary key references auth.users (id) on delete cascade,
-  email       text not null,
-  full_name   text,
-  role        public.user_role not null default 'OPERATOR',
-  active      boolean not null default true,
-  created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
-);
-
-comment on table public.profiles is 'Perfil de aplicación. 1:1 con auth.users; guarda rol y metadatos.';
-
-create trigger trg_profiles_updated_at
-  before update on public.profiles
-  for each row execute function public.set_updated_at();
 
 -- Crea automáticamente un profile cuando se registra un auth.user.
 -- El rol y nombre pueden venir en raw_user_meta_data (al hacer signUp con options.data).

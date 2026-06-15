@@ -7,6 +7,7 @@ import type { Tables, TablesInsert, TablesUpdate, Enums } from './database.types
 
 // Filas
 export type Profile = Tables<'profiles'>
+export type BottleCategory = Tables<'bottle_categories'>
 export type BottleType = Tables<'bottle_types'>
 export type Bottle = Tables<'bottles'>
 export type Category = Tables<'categories'>
@@ -16,6 +17,7 @@ export type RecipeDetail = Tables<'recipe_details'>
 
 // Inserts
 export type BottleTypeInsert = TablesInsert<'bottle_types'>
+export type BottleCategoryInsert = TablesInsert<'bottle_categories'>
 export type BottleInsert = TablesInsert<'bottles'>
 export type CategoryInsert = TablesInsert<'categories'>
 export type ProductInsert = TablesInsert<'products'>
@@ -25,6 +27,7 @@ export type RecipeDetailInsert = TablesInsert<'recipe_details'>
 // Updates
 export type ProfileUpdate = TablesUpdate<'profiles'>
 export type BottleTypeUpdate = TablesUpdate<'bottle_types'>
+export type BottleCategoryUpdate = TablesUpdate<'bottle_categories'>
 export type BottleUpdate = TablesUpdate<'bottles'>
 export type CategoryUpdate = TablesUpdate<'categories'>
 export type ProductUpdate = TablesUpdate<'products'>
@@ -37,6 +40,9 @@ export type MovementType = Enums<'movement_type'>
 
 // Vistas compuestas (joins) usadas en la UI
 export type BottleWithType = Bottle & { bottle_type: BottleType | null }
+export type BottleTypeWithCategory = BottleType & {
+  bottle_category: BottleCategory | null
+}
 export type ProductWithCategory = Product & { category: Category | null }
 export type RecipeWithDetails = Recipe & {
   product: Product | null

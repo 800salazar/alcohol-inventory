@@ -6,6 +6,7 @@ import { z } from 'zod'
  * payload en la página (ver toBottleTypePayload).
  */
 export const bottleTypeSchema = z.object({
+  bottle_category_id: z.string().uuid('Selecciona una categoría'),
   name: z.string().min(2, 'Mínimo 2 caracteres').max(120, 'Máximo 120'),
   barcode: z.string().max(120, 'Máximo 120').optional(),
   full_ounces: z
@@ -28,6 +29,7 @@ export type BottleTypeForm = z.infer<typeof bottleTypeSchema>
 /** Convierte los valores del formulario al payload de la base de datos. */
 export function toBottleTypePayload(values: BottleTypeForm) {
   return {
+    bottle_category_id: values.bottle_category_id,
     name: values.name.trim(),
     barcode: values.barcode?.trim() || null,
     full_ounces: Number(values.full_ounces),

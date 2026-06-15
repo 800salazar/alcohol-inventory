@@ -6,6 +6,7 @@ import { DashboardPage } from '@/features/dashboard/dashboard-page'
 import { BottleTypesPage } from '@/features/bottle-types/bottle-types-page'
 import { BottlesPage } from '@/features/bottles/bottles-page'
 import { CategoriesPage } from '@/features/categories/categories-page'
+import { BottleCategoriesPage } from '@/features/bottle-categories/bottle-categories-page'
 import { ProductsPage } from '@/features/products/products-page'
 import { RecipesPage } from '@/features/recipes/recipes-page'
 import { InitialInventoryPage } from '@/features/inventory/initial-inventory-page'
@@ -22,6 +23,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="bottle-types" element={<BottleTypesPage />} />
           <Route path="bottles" element={<BottlesPage />} />
+          <Route path="bottle-categories" element={<BottleCategoriesPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="recipes" element={<RecipesPage />} />
